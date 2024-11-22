@@ -1,1 +1,1 @@
-IMAGE_INSTALL:append:stm32mprtcommon = " rt-tests hwlatdetect"
+IMAGE_INSTALL:append:stm32mprtcommon = "stress-ng rt-tests hwlatdetect"
