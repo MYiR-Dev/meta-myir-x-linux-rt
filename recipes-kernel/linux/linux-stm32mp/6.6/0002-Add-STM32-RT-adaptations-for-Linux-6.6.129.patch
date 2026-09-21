@@ -1,34 +1,15 @@
-From f6587496f2c5894abf9bcfbd136a9693d0e97f11 Mon Sep 17 00:00:00 2001
-From: Christophe Priouzeau <christophe.priouzeau@foss.st.com>
-Date: Tue, 16 Dec 2025 13:49:21 +0100
-Subject: [PATCH 2/2] v6.6-stm32mp-rt-r3
+From 41e7c1406c31bae18105664281d494ee479d292a Mon Sep 17 00:00:00 2001
+From: MYiR RT port <wujl@myir.com>
+Date: Thu, 3 Sep 2026 11:31:19 +0800
+Subject: [PATCH 2/2] Add STM32 RT adaptations for Linux 6.6.129
 
-Upstream-Status: Pending [specific to ST boards]
----
- .../configs/fragment-07-rt-sysvinit.config    | 12 ++++++
- arch/arm/configs/fragment-07-rt.config        |  9 +++++
- arch/arm/configs/fragment-10-rt-perf.config   | 40 +++++++++++++++++++
- .../configs/fragment-07-rt-sysvinit.config    | 12 ++++++
- arch/arm64/configs/fragment-07-rt.config      |  9 +++++
- arch/arm64/configs/fragment-10-rt-perf.config | 40 +++++++++++++++++++
- drivers/clocksource/timer-stm32-lp.c          | 24 ++++++++++-
- drivers/hwtracing/coresight/coresight-cti.h   | 10 +++++
- drivers/mfd/syscon.c                          |  3 ++
- drivers/tty/serial/stm32-usart.c              |  8 ++--
- 10 files changed, 162 insertions(+), 5 deletions(-)
- create mode 100644 arch/arm/configs/fragment-07-rt-sysvinit.config
- create mode 100644 arch/arm/configs/fragment-07-rt.config
- create mode 100644 arch/arm/configs/fragment-10-rt-perf.config
- create mode 100644 arch/arm64/configs/fragment-07-rt-sysvinit.config
- create mode 100644 arch/arm64/configs/fragment-07-rt.config
- create mode 100644 arch/arm64/configs/fragment-10-rt-perf.config
 
 diff --git a/arch/arm/configs/fragment-07-rt-sysvinit.config b/arch/arm/configs/fragment-07-rt-sysvinit.config
 new file mode 100644
-index 000000000..49a4baf60
+index 000000000000..4a858d74d97d
 --- /dev/null
 +++ b/arch/arm/configs/fragment-07-rt-sysvinit.config
-@@ -0,0 +1,12 @@
+@@ -0,0 +1,11 @@
 +CONFIG_CGROUPS=y
 +# CONFIG_CGROUP_SCHED is not set
 +# CONFIG_CGROUP_PIDS is not set
@@ -40,10 +21,9 @@ index 000000000..49a4baf60
 +# CONFIG_CGROUP_DEBUG is not set
 +# CONFIG_CGROUP_NET_PRIO is not set
 +# CONFIG_CGROUP_NET_CLASSID is not set
-+
 diff --git a/arch/arm/configs/fragment-07-rt.config b/arch/arm/configs/fragment-07-rt.config
 new file mode 100644
-index 000000000..aba9d8c25
+index 000000000000..aba9d8c25610
 --- /dev/null
 +++ b/arch/arm/configs/fragment-07-rt.config
 @@ -0,0 +1,9 @@
@@ -58,7 +38,7 @@ index 000000000..aba9d8c25
 +# CONFIG_CPU_IDLE is not set
 diff --git a/arch/arm/configs/fragment-10-rt-perf.config b/arch/arm/configs/fragment-10-rt-perf.config
 new file mode 100644
-index 000000000..46e67dba9
+index 000000000000..46e67dba9ef8
 --- /dev/null
 +++ b/arch/arm/configs/fragment-10-rt-perf.config
 @@ -0,0 +1,40 @@
@@ -104,10 +84,10 @@ index 000000000..46e67dba9
 +# CONFIG_ARM_SMC_WATCHDOG is not set
 diff --git a/arch/arm64/configs/fragment-07-rt-sysvinit.config b/arch/arm64/configs/fragment-07-rt-sysvinit.config
 new file mode 100644
-index 000000000..49a4baf60
+index 000000000000..4a858d74d97d
 --- /dev/null
 +++ b/arch/arm64/configs/fragment-07-rt-sysvinit.config
-@@ -0,0 +1,12 @@
+@@ -0,0 +1,11 @@
 +CONFIG_CGROUPS=y
 +# CONFIG_CGROUP_SCHED is not set
 +# CONFIG_CGROUP_PIDS is not set
@@ -119,10 +99,9 @@ index 000000000..49a4baf60
 +# CONFIG_CGROUP_DEBUG is not set
 +# CONFIG_CGROUP_NET_PRIO is not set
 +# CONFIG_CGROUP_NET_CLASSID is not set
-+
 diff --git a/arch/arm64/configs/fragment-07-rt.config b/arch/arm64/configs/fragment-07-rt.config
 new file mode 100644
-index 000000000..aba9d8c25
+index 000000000000..aba9d8c25610
 --- /dev/null
 +++ b/arch/arm64/configs/fragment-07-rt.config
 @@ -0,0 +1,9 @@
@@ -137,7 +116,7 @@ index 000000000..aba9d8c25
 +# CONFIG_CPU_IDLE is not set
 diff --git a/arch/arm64/configs/fragment-10-rt-perf.config b/arch/arm64/configs/fragment-10-rt-perf.config
 new file mode 100644
-index 000000000..46e67dba9
+index 000000000000..46e67dba9ef8
 --- /dev/null
 +++ b/arch/arm64/configs/fragment-10-rt-perf.config
 @@ -0,0 +1,40 @@
@@ -182,7 +161,7 @@ index 000000000..46e67dba9
 +
 +# CONFIG_ARM_SMC_WATCHDOG is not set
 diff --git a/drivers/clocksource/timer-stm32-lp.c b/drivers/clocksource/timer-stm32-lp.c
-index dedf59187..4feb2b79b 100644
+index dedf59187352..4feb2b79b5eb 100644
 --- a/drivers/clocksource/timer-stm32-lp.c
 +++ b/drivers/clocksource/timer-stm32-lp.c
 @@ -45,7 +45,8 @@ static int stm32_clkevent_lp_shutdown(struct clock_event_device *clkevt)
@@ -238,7 +217,7 @@ index dedf59187..4feb2b79b 100644
  
  	stm32_clkevent_lp_init(priv, pdev->dev.parent->of_node, rate);
 diff --git a/drivers/hwtracing/coresight/coresight-cti.h b/drivers/hwtracing/coresight/coresight-cti.h
-index cb9ee616d..9f9eaaf29 100644
+index cb9ee616d01f..9f9eaaf29add 100644
 --- a/drivers/hwtracing/coresight/coresight-cti.h
 +++ b/drivers/hwtracing/coresight/coresight-cti.h
 @@ -17,6 +17,16 @@
@@ -259,7 +238,7 @@ index cb9ee616d..9f9eaaf29 100644
   * Device registers
   * 0x000 - 0x144: CTI programming and status
 diff --git a/drivers/mfd/syscon.c b/drivers/mfd/syscon.c
-index df2e45643..7bb8eb972 100644
+index df2e456430d4..7bb8eb972433 100644
 --- a/drivers/mfd/syscon.c
 +++ b/drivers/mfd/syscon.c
 @@ -36,6 +36,9 @@ static const struct regmap_config syscon_regmap_config = {
@@ -273,7 +252,7 @@ index df2e45643..7bb8eb972 100644
  
  static struct syscon *of_syscon_register(struct device_node *np, bool check_res)
 diff --git a/drivers/tty/serial/stm32-usart.c b/drivers/tty/serial/stm32-usart.c
-index 77b17b943..dec6b1050 100644
+index 8d661721cfb8..5df5ec927a61 100644
 --- a/drivers/tty/serial/stm32-usart.c
 +++ b/drivers/tty/serial/stm32-usart.c
 @@ -847,7 +847,7 @@ static void stm32_usart_tx_dma_complete(void *arg)
@@ -302,7 +281,7 @@ index 77b17b943..dec6b1050 100644
  
  	pm_runtime_mark_last_busy(port->dev);
  	pm_runtime_put_autosuspend(port->dev);
-@@ -2484,7 +2484,7 @@ static int __maybe_unused stm32_usart_serial_en_wakeup(struct uart_port *port,
+@@ -2480,7 +2480,7 @@ static int __maybe_unused stm32_usart_serial_en_wakeup(struct uart_port *port,
  		}
  
  		/* Poll data from RX FIFO if any */
@@ -311,6 +290,3 @@ index 77b17b943..dec6b1050 100644
  		size = stm32_usart_receive_chars(port, false);
  		if (size)
  			tty_flip_buffer_push(tport);
--- 
-2.43.0
-

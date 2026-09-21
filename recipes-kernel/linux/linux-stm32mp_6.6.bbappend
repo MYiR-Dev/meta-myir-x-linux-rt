@@ -1,8 +1,8 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}:${THISDIR}/${PN}:${THISDIR}/${PN}/${LINUX_VERSION}:"
 
 SRC_URI:append:stm32mprtcommon = " \
-    file://0010-Rebase-on-v6.6.116-rt66.patch \
-    file://0011-v6.6-stm32mp-rt-r3.patch \
+    file://0001-Rebase-PREEMPT_RT-onto-Linux-6.6.129.patch \
+    file://0002-Add-STM32-RT-adaptations-for-Linux-6.6.129.patch \
     "
 
 LINUX_RELEASE:stm32mprtcommon = "rt-r3"
