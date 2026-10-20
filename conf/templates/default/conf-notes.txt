@@ -1,0 +1,3 @@
+Available image for the MYIR OpenSTLinux RT layer:
+
+  myir-image-core - MYIR core image with PREEMPT_RT and RT test tools
