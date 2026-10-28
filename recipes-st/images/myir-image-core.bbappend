@@ -3,4 +3,4 @@
 REQUIRED_DISTRO_FEATURES:remove:myd-ld25x-rt = "wayland"
 CORE_IMAGE_EXTRA_INSTALL:remove:myd-ld25x-rt = "myir-tool event-gtk-player autorun"
 
-IMAGE_INSTALL:append:stm32mprtcommon = " rt-tests hwlatdetect"
+IMAGE_INSTALL:append:stm32mprtcommon = " rt-tests hwlatdetect stress-ng"
